@@ -5,9 +5,11 @@ import time
 import re
 import threading
 
+exitFlag = False
+
 root = Tk()
 root.attributes('-alpha', 0.1)
-root.geometry("400x600")
+root.geometry("600x400")
 
 # root.update()
 
@@ -38,11 +40,12 @@ class StoppableThread (threading.Thread):
 
 def increaseAlpha():
 	global root
-	root.attributes('-alpha', 0.5)
+	root.attributes('-alpha', 0.6)
 
 def decreaseAlpha():
-	global root
-	root.attributes('-alpha', 0.03)
+	global root, exitFlag
+	if not exitFlag:
+		root.attributes('-alpha', 0.07)
 
 def mouseEnter(event):
 	for thread in threading.enumerate():
@@ -76,7 +79,6 @@ def output():
 		# img.show()
 		
 		start = time.clock()
-		# image = Image.open('phototest.tif')
 		print( image_to_string(img) );
 		print time.clock() - start
 
@@ -86,5 +88,12 @@ def output():
 
 	root.after(200,output)
 
+def on_quit():
+	global exitFlag
+	exitFlag = True
+	root.destroy()
+
 root.after(200, output)
+root.wm_attributes("-topmost", 1)
+root.protocol("WM_DELETE_WINDOW", on_quit)
 root.mainloop()
