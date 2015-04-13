@@ -5,24 +5,8 @@ import time
 import re
 import threading
 
-exitFlag = False
 
-root = Tk()
-root.attributes('-alpha', 0.1)
-root.geometry("600x400")
-
-# root.update()
-
-# print (root.winfo_width())
-# print (root.winfo_height())
-# print (root.winfo_reqwidth())
-
-position_str = StringVar()
-Message(root, textvariable=position_str, width=150).pack(side=BOTTOM)
-runOnce = False
-count = 0
-
-class StoppableThread (threading.Thread):
+class Stoppable_Thread (threading.Thread):
 	def __init__(self, delay, callback):
 		threading.Thread.__init__(self)
 		self.delay = delay
@@ -38,62 +22,74 @@ class StoppableThread (threading.Thread):
 	def stop(self):
 		self._stop.set()
 
-def increaseAlpha():
-	global root
-	root.attributes('-alpha', 0.6)
 
-def decreaseAlpha():
-	global root, exitFlag
-	if not exitFlag:
-		root.attributes('-alpha', 0.07)
+class Capture_Windows ():
+	def __init__(self):
+		self.exitFlag = False
+		self.root = Tk()
+		# put window's info at bottom of the window
+		self.position_str = StringVar()
+		Message(self.root, textvariable=self.position_str, width=150).pack(side=BOTTOM)
+		
+		self.root.wm_attributes("-topmost", 1)
+		self.root.geometry("600x400")
+		self.root.attributes('-alpha', 0.1)
+		# increase window' opacity when mouse hover
+		self.root.bind("<Enter>", self.mouseEnter)
+		# decrease window's opacity 2 seconds after mouse leave
+		self.root.bind("<Leave>", self.mouseLeave)
+		self.root.after(200, self.output)
+		self.root.protocol("WM_DELETE_WINDOW", self.on_quit)
+		self.root.mainloop()
+		
+		# root.update()
+		# print (root.winfo_width())
+		# print (root.winfo_height())
+		# print (root.winfo_reqwidth())
 
-def mouseEnter(event):
-	for thread in threading.enumerate():
-		if isinstance(thread, StoppableThread):
-			thread.stop()
-	increaseAlpha()
+	def increaseAlpha(self):
+		self.root.attributes('-alpha', 0.6)
 
-def mouseLeave(event):
-	thread = StoppableThread(2, decreaseAlpha)
-	thread.start()
-	
+	def decreaseAlpha(self):
+		# don't set attribute after the root been destroyed
+		if not self.exitFlag:
+			self.root.attributes('-alpha', 0.07)
 
-root.bind("<Enter>", mouseEnter)
-root.bind("<Leave>", mouseLeave)
+	def mouseEnter(self, event):
+		for thread in threading.enumerate():
+			if isinstance(thread, Stoppable_Thread):
+				thread.stop()
+		self.increaseAlpha()
 
-def output():
-	st = root.geometry()
-	width,height,posX,posY = [int(x) for x in re.split(r'[x+]', st)]
-	posX = root.winfo_rootx()
-	posY = root.winfo_rooty()
-	width = root.winfo_width()
-	height = root.winfo_height()
-	msg = "X: %d, Y: %d, W: %d H: %d"%(posX, posY, width, height)
-	position_str.set( msg )
+	def mouseLeave(self, event):
+		thread = Stoppable_Thread(2, self.decreaseAlpha)
+		thread.start()
 
-	global runOnce, count
-	# count += 1
-	if not runOnce:
-		bbox = posX, posY, posX+width, posY+height-20
-		img = ImageGrab.grab(bbox)
+	def on_quit(self):
+		self.exitFlag = True
+		self.root.destroy()
+
+	def output(self):
+		info_str = self.root.geometry()
+		# width,height,posX,posY = [int(x) for x in re.split(r'[x+]', info_str)]
+		posX = self.root.winfo_rootx()
+		posY = self.root.winfo_rooty()
+		width = self.root.winfo_width()
+		height = self.root.winfo_height()
+		display_message = "X: %d, Y: %d, W: %d H: %d"%(posX, posY, width, height)
+		self.position_str.set( display_message )
+
+		caputure_box = posX, posY, posX+width, posY+height-20
+		img = ImageGrab.grab(caputure_box)
 		# img.show()
 		
 		start = time.clock()
 		print( image_to_string(img) );
 		print time.clock() - start
 
-		if count > 20:
-			# img.show()
-			runOnce = True
+		self.root.after(200, self.output)
+	
 
-	root.after(200,output)
 
-def on_quit():
-	global exitFlag
-	exitFlag = True
-	root.destroy()
-
-root.after(200, output)
-root.wm_attributes("-topmost", 1)
-root.protocol("WM_DELETE_WINDOW", on_quit)
-root.mainloop()
+if __name__ == '__main__':
+	capture = Capture_Windows()
