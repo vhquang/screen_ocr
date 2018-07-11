@@ -13,23 +13,23 @@ class Stoppable_Thread (threading.Thread):
         threading.Thread.__init__(self)
         self.delay = delay
         self.callback = callback
-        self._stop = threading.Event()
+        self._stopper = threading.Event()
 
     def run(self):
         if self.delay != 0:
             time.sleep(self.delay)
-        if not self._stop.isSet():
+        if not self._stopper.is_set():
             self.callback()
 
-    def stop(self):
-        self._stop.set()
+    def mark_stop(self):
+        self._stopper.set()
 
 
 class Capture_Windows ():
     def __init__(self, width=600, height=400):
         self._exit = False
         self.high_alpha = 0.6
-        self.low_alpha = 0.07
+        self.low_alpha = 0.07 * 10
         self.root = Tk()
         self.root.wm_attributes("-topmost", 1)
         self.root.geometry('{w}x{h}'.format(w=width, h=height))
@@ -57,14 +57,14 @@ class Capture_Windows ():
         """
         for thread in threading.enumerate():
             if isinstance(thread, Stoppable_Thread):
-                thread.stop()
+                thread.mark_stop()
         self.increaseAlpha()
 
     def mouseLeave(self, event):
         """
         Decrease window's opacity 2 seconds after mouse leave.
         """
-        thread = Stoppable_Thread(2, self.decreaseAlpha)
+        thread = Stoppable_Thread(1, self.decreaseAlpha)
         thread.start()
 
     def on_quit(self):
