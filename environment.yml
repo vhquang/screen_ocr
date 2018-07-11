@@ -1,0 +1,8 @@
+name: screen_ocr
+dependencies:
+- pillow
+- pip
+- python>=3.6.0
+- tk
+- pip:
+  - opencv-python
