@@ -1,3 +1,4 @@
 *.pyc
 *.bmp
 test*
+__pychache__
