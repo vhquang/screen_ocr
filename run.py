@@ -29,7 +29,7 @@ class Capture_Windows ():
     def __init__(self, width=600, height=400):
         self._exit = False
         self.high_alpha = 0.6
-        self.low_alpha = 0.07 * 10
+        self.low_alpha = 0.07
         self.root = Tk()
         self.root.wm_attributes("-topmost", 1)
         self.root.geometry('{w}x{h}'.format(w=width, h=height))
