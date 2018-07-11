@@ -1,0 +1,3 @@
+[submodule "Pytesser"]
+	path = Pytesser
+	url = git@github.com:RobinDavid/Pytesser.git

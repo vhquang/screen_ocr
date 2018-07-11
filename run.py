@@ -1,9 +1,11 @@
-from pytesser import *
-from Tkinter import *
-from PIL import ImageGrab
-import time
+from tkinter import Tk, StringVar, Message
 import re
+import tkinter
+import time
 import threading
+
+# from PIL import ImageGrab
+from Pytesser import pytesser
 
 
 class Stoppable_Thread (threading.Thread):
@@ -29,8 +31,8 @@ class Capture_Windows ():
         self.root = Tk()
         # put window's info at bottom of the window
         self.position_str = StringVar()
-        Message(self.root, textvariable=self.position_str, width=150).pack(side=BOTTOM)
-        
+        Message(self.root, textvariable=self.position_str, width=150).pack(side=tkinter.BOTTOM)
+
         self.root.wm_attributes("-topmost", 1)
         self.root.geometry("600x400")
         self.root.attributes('-alpha', 0.1)
@@ -41,7 +43,7 @@ class Capture_Windows ():
         self.root.after(200, self.output)
         self.root.protocol("WM_DELETE_WINDOW", self.on_quit)
         self.root.mainloop()
-        
+
         # root.update()
         # print (root.winfo_width())
         # print (root.winfo_height())
@@ -80,15 +82,15 @@ class Capture_Windows ():
         self.position_str.set( display_message )
 
         caputure_box = posX, posY, posX+width, posY+height-20
-        img = ImageGrab.grab(caputure_box)
+        # img = ImageGrab.grab(caputure_box)
         # img.show()
-        
+
         start = time.clock()
-        print( image_to_string(img) );
-        print time.clock() - start
+        # print(pytesser.image_to_string(img))
+        print(time.clock() - start)
 
         self.root.after(200, self.output)
-    
+
 
 
 if __name__ == '__main__':
